@@ -1,13 +1,75 @@
 <Project>
-  <PropertyGroup>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-  </PropertyGroup>
 
-  <ItemGroup>
-    <!-- Code Analysis -->
-    <PackageVersion Include="Meziantou.Analyzer" Version="2.0.257" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.16.0.128591" />
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.14.1" />
-    <PackageVersion Include="xunit.analyzers" Version="1.26.0" />
-  </ItemGroup>
+    <!--
+      Central Package Management: every NuGet version used anywhere in the solution is
+      declared exactly once, here. A .csproj writes <PackageReference Include="X" />
+      with no Version attribute and picks up the version below.
+    -->
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <!-- Why: leave transitive dependencies to NuGet's resolver. Pinning them too
+             tends to produce downgrade errors every time a direct package updates. -->
+        <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+    </PropertyGroup>
+
+    <ItemGroup Label="Analyzers">
+        <!-- Why: analyzer versions are pinned exactly ([x.y.z] = "this version, nothing
+             else"). A floating analyzer version means a NuGet restore on a different day
+             can introduce new warnings and, with TreatWarningsAsErrors, break the build
+             without a single line of code changing. -->
+        <PackageVersion Include="Meziantou.Analyzer" Version="[2.0.295]" />
+        <PackageVersion Include="SonarAnalyzer.CSharp" Version="[10.28.0.143324]" />
+        <PackageVersion Include="Roslynator.Analyzers" Version="[4.15.0]" />
+        <PackageVersion Include="xunit.analyzers" Version="[1.27.0]" />
+    </ItemGroup>
+
+    <ItemGroup Label="Aspire">
+        <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.4.6" />
+        <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.4.6" />
+        <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.7.0" />
+        <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.7.0" />
+    </ItemGroup>
+
+    <ItemGroup Label="ASP.NET Core and EF Core">
+        <PackageVersion Include="EFCore.NamingConventions" Version="10.0.1" />
+        <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
+        <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.9" />
+        <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+        <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+        <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9" />
+        <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
+        <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
+        <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+        <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
+    </ItemGroup>
+
+    <ItemGroup Label="Validation">
+        <PackageVersion Include="FluentValidation" Version="12.1.1" />
+        <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    </ItemGroup>
+
+    <ItemGroup Label="Observability">
+        <PackageVersion Include="Npgsql.OpenTelemetry" Version="10.0.3" />
+        <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.16.0" />
+        <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.16.0" />
+        <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.16.0" />
+        <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.16.0" />
+        <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
+        <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+        <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
+    </ItemGroup>
+
+    <ItemGroup Label="Testing">
+        <PackageVersion Include="coverlet.collector" Version="10.0.1" />
+        <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.9" />
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
+        <PackageVersion Include="NetArchTest.Rules" Version="1.3.2" />
+        <PackageVersion Include="NSubstitute" Version="5.3.0" />
+        <PackageVersion Include="Respawn" Version="7.0.0" />
+        <PackageVersion Include="Testcontainers.PostgreSql" Version="4.15.0" />
+        <PackageVersion Include="xunit" Version="2.9.3" />
+        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    </ItemGroup>
+
 </Project>

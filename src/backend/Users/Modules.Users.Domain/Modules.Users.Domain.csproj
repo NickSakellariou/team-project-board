@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <!--
+      Why an infrastructure-sounding package in the Domain project:
+      Microsoft.AspNetCore.Identity.EntityFrameworkCore is here because User derives from
+      IdentityUser, and that base class is the domain model for a user in this project.
+      A purist Clean Architecture would keep the Domain free of any framework type and map
+      to a persistence model at the boundary. We accept the coupling — see
+      docs/adr/0008-identity-and-jwt.md for what it buys and what it costs.
+    -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Common\Modules.Common.Domain\Modules.Common.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

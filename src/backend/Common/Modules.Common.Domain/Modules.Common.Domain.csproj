@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      The innermost project in the solution. It has NO ProjectReference and NO
+      PackageReference by design: every other project may depend on it, and it may
+      depend on nothing. See docs/concepts/clean-architecture-and-slices.md.
+    -->
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+</Project>

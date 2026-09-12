@@ -1,0 +1,188 @@
+### Users module — the whole flow, in order.
+#
+# Works in VS Code (REST Client extension), Visual Studio and Rider.
+# Run the AppHost first, then set @port below to the API port shown in the dashboard.
+#
+# Run these top to bottom: later requests reuse variables captured from earlier responses.
+
+@port = 5193
+@host = http://localhost:{{port}}
+
+@email = nick@example.com
+@password = Password1
+
+# The development admin seeded by UserSeedService.
+@adminEmail = admin@teamprojectboard.local
+@adminPassword = Admin123!
+
+###
+# 1. Register. Expect 201 with the new user, whose role is "User" — registration never
+#    grants Admin, whatever the client sends.
+# @name register
+POST {{host}}/api/users/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "displayName": "Nick"
+}
+
+###
+# 2. Register the same email again. Expect 409 — the Result<T> to ProblemDetails path,
+#    keyed by the error code Users.RegistrationFailed.
+POST {{host}}/api/users/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "displayName": "Someone Else"
+}
+
+###
+# 3. Register with a weak password. Expect 400 from the FluentValidation rules, before the
+#    handler is ever reached.
+POST {{host}}/api/users/register
+Content-Type: application/json
+
+{
+  "email": "weak@example.com",
+  "password": "short",
+  "displayName": "Weak"
+}
+
+###
+# 4. Log in. Expect 200 with an access token, a refresh token and an expiry.
+# @name login
+POST {{host}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+###
+# 5. The wrong password. Expect 400 — and note the message is identical to an unknown
+#    email, so the endpoint cannot be used to discover which addresses have accounts.
+POST {{host}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "WrongPassword1"
+}
+
+###
+# 6. Who am I. Expect 200.
+GET {{host}}/api/users/me
+Authorization: Bearer {{login.response.body.accessToken}}
+
+###
+# 7. The same without a token. Expect 401 — unauthenticated, not forbidden.
+GET {{host}}/api/users/me
+
+###
+# 8. Read another user as an ordinary user. Expect 403: authenticated, but lacking the
+#    users:read claim. The distinction from 7 is the point.
+GET {{host}}/api/users/{{register.response.body.id}}
+Authorization: Bearer {{login.response.body.accessToken}}
+
+###
+# 9. Refresh. Expect 200 and a *different* refresh token — rotation.
+# @name refresh
+POST {{host}}/api/users/refresh
+Content-Type: application/json
+
+{
+  "accessToken": "{{login.response.body.accessToken}}",
+  "refreshToken": "{{login.response.body.refreshToken}}"
+}
+
+###
+# 10. Replay the refresh token from step 4, now spent. Expect 400.
+#     This also invalidates every refresh token the user holds, including the one issued in
+#     step 9 — once a chain is known to be compromised, all of it ends.
+POST {{host}}/api/users/refresh
+Content-Type: application/json
+
+{
+  "accessToken": "{{login.response.body.accessToken}}",
+  "refreshToken": "{{login.response.body.refreshToken}}"
+}
+
+###
+# 11. Sign in as the seeded admin.
+# @name adminLogin
+POST {{host}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+###
+# 12. Read the user as an admin. Expect 200 — the same request as step 8, different claims.
+GET {{host}}/api/users/{{register.response.body.id}}
+Authorization: Bearer {{adminLogin.response.body.accessToken}}
+
+###
+# 13. Rename the user. Expect 200.
+PUT {{host}}/api/users/{{register.response.body.id}}
+Authorization: Bearer {{adminLogin.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "displayName": "Nick (renamed)"
+}
+
+###
+# 14. Promote to Admin. Expect 200 with roles: ["Admin"] — exactly one role, because the
+#     old one is removed rather than added to.
+PUT {{host}}/api/users/{{register.response.body.id}}/role
+Authorization: Bearer {{adminLogin.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "role": "Admin"
+}
+
+###
+# 15. An unknown role. Expect 400 listing the valid values.
+PUT {{host}}/api/users/{{register.response.body.id}}/role
+Authorization: Bearer {{adminLogin.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "role": "Superuser"
+}
+
+###
+# 16. Admin changing their own role. Expect 409 — the guard against the last admin
+#     demoting themselves.
+PUT {{host}}/api/users/{{adminLogin.response.body.id}}/role
+Authorization: Bearer {{adminLogin.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "role": "User"
+}
+
+###
+# 17. Delete the user. Expect 204.
+DELETE {{host}}/api/users/{{register.response.body.id}}
+Authorization: Bearer {{adminLogin.response.body.accessToken}}
+
+###
+# 18. Read the deleted user. Expect 404.
+GET {{host}}/api/users/{{register.response.body.id}}
+Authorization: Bearer {{adminLogin.response.body.accessToken}}
+
+###
+# Health checks. Development only.
+GET {{host}}/health
+
+###
+GET {{host}}/alive

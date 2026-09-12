@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    </ItemGroup>
+
+    <!-- Why: handlers and their interfaces are internal, which is right for production
+         code and inconvenient for tests. Granting one named test assembly access is
+         better than widening the handlers to public purely so they can be tested. -->
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>Modules.Users.Tests.Unit</_Parameter1>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <!--
+      Note what is absent: any reference to another module. A Features project may
+      reference its own Infrastructure, the Common projects, and other modules'
+      *.PublicApi — nothing else. Modules.Common.Tests.Architecture enforces it.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\Common\Modules.Common.API\Modules.Common.API.csproj" />
+        <ProjectReference Include="..\..\Common\Modules.Common.Application\Modules.Common.Application.csproj" />
+        <ProjectReference Include="..\Modules.Users.Infrastructure\Modules.Users.Infrastructure.csproj" />
+        <ProjectReference Include="..\Modules.Users.PublicApi\Modules.Users.PublicApi.csproj" />
+    </ItemGroup>
+
+</Project>

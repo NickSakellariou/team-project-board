@@ -1,26 +1,50 @@
 <Project>
+
+    <!--
+      Applied automatically to every project under src/backend.
+      Anything that should be true of ALL projects belongs here rather than in
+      individual .csproj files, so a new module cannot accidentally opt out.
+    -->
     <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+
+        <!-- Why: AnalysisMode=All turns on every built-in analyzer rule, not just the
+             default "recommended" subset. Combined with TreatWarningsAsErrors this makes
+             the compiler the first code reviewer. Suppress individual rules in
+             .editorconfig with a reason, never by weakening these two lines. -->
         <AnalysisLevel>latest</AnalysisLevel>
         <AnalysisMode>All</AnalysisMode>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+
+        <!-- Why: without this, .editorconfig style rules only show in the IDE.
+             This makes them fail the build (and therefore CI) too. -->
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+        <!-- Why: NuGet versions live in Directory.Packages.props, so a .csproj says
+             *which* package it needs and never *which version*. Stops two projects
+             silently referencing different versions of the same library. -->
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     </PropertyGroup>
 
+    <!-- Third-party analyzers, on every project. Each catches a different class of
+         problem: Meziantou (async/culture/perf pitfalls), Sonar (bugs and code smells),
+         Roslynator (simplifications), xunit.analyzers (test-authoring mistakes). -->
     <ItemGroup>
-    <PackageReference Include="Meziantou.Analyzer">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Roslynator.Analyzers">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.analyzers">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+        <PackageReference Include="Meziantou.Analyzer">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="SonarAnalyzer.CSharp">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Roslynator.Analyzers">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
 </Project>

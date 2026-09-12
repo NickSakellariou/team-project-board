@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      Contracts only. This project has no references at all — not even to the Users
+      domain — because every other module is allowed to reference it, and anything
+      reachable from here becomes reachable by all of them.
+
+      Keeping it empty of dependencies is what makes the boundary real rather than
+      aspirational. The architecture tests assert it.
+    -->
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+</Project>

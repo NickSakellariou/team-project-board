@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <!-- Why EF Core Design here and not only in the Infrastructure projects: the
+             `dotnet ef` tooling builds the *startup* project to find the DI container, so
+             it needs the design-time package on this project too. -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+        <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Serilog.Sinks.Console" />
+    </ItemGroup>
+
+    <!-- Lets the integration tests resolve UserSeedService to re-seed between tests,
+         without widening it to public for production code that has no use for it. -->
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>Modules.Users.Tests.Integration</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Common\Modules.Common.API\Modules.Common.API.csproj" />
+        <ProjectReference Include="..\Common\Modules.Common.Infrastructure\Modules.Common.Infrastructure.csproj" />
+        <ProjectReference Include="..\TeamProjectBoard.ServiceDefaults\TeamProjectBoard.ServiceDefaults.csproj" />
+        <ProjectReference Include="..\Users\Modules.Users.Features\Modules.Users.Features.csproj" />
+    </ItemGroup>
+
+</Project>
