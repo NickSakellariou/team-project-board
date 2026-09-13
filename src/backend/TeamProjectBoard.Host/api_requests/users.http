@@ -124,6 +124,13 @@ Content-Type: application/json
 }
 
 ###
+# 11b. Who is the admin. Expect 200 with roles: ["Admin"].
+#      The login response carries only tokens, no id, so step 16 reads the admin's id here.
+# @name adminMe
+GET {{host}}/api/users/me
+Authorization: Bearer {{adminLogin.response.body.accessToken}}
+
+###
 # 12. Read the user as an admin. Expect 200 — the same request as step 8, different claims.
 GET {{host}}/api/users/{{register.response.body.id}}
 Authorization: Bearer {{adminLogin.response.body.accessToken}}
@@ -162,7 +169,7 @@ Content-Type: application/json
 ###
 # 16. Admin changing their own role. Expect 409 — the guard against the last admin
 #     demoting themselves.
-PUT {{host}}/api/users/{{adminLogin.response.body.id}}/role
+PUT {{host}}/api/users/{{adminMe.response.body.id}}/role
 Authorization: Bearer {{adminLogin.response.body.accessToken}}
 Content-Type: application/json
 

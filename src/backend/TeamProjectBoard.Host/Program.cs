@@ -1,3 +1,4 @@
+using Modules.Common.API;
 using Modules.Common.Infrastructure.Database;
 using Serilog;
 using TeamProjectBoard.Host.Seeding;

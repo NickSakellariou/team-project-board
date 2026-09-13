@@ -34,5 +34,5 @@ public enum ErrorType
     Forbidden,
 
     /// <summary>A caller-defined category, carried in <see cref="Error.NumericType"/>.</summary>
-    Custom
+    Custom,
 }

@@ -1,12 +1,12 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
 using Modules.Common.API.ErrorHandling;
 using Serilog;
 
-// ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Modules.Common.API;
 
 /// <summary>
 /// Web-API services shared by every module: OpenAPI, problem details, JSON options.
