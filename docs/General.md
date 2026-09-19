@@ -213,7 +213,7 @@ See [ADR-0011](adr/0011-architecture-tests.md) and
 
 ## Step 6: Build features as vertical slices
 
-### Sprint 1 — Users and authentication ✅
+### Sprint 1 — Users and authentication 
 
 - Register, login, refresh token, get current user
 - Get / update / delete user, change role (admin)
@@ -274,13 +274,10 @@ Each sprint produces a working, testable increment.
 
 ## Modules
 
-### 1. Users ✅
+### 1. Users 
 
 Users and system-level roles. Registration, login, user management, authentication,
 `Admin` / `User`. Depends on nothing. See [src/backend/Users/README.md](../src/backend/Users/README.md).
-
-*(Called the "Identity Module" in the original plan; renamed to avoid colliding with
-`Microsoft.AspNetCore.Identity` — see [ADR-0012](adr/0012-module-and-project-naming.md).)*
 
 ### 2. Projects
 

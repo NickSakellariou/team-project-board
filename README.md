@@ -6,23 +6,6 @@ Built as a personal learning project to explore modern .NET application architec
 real-time collaboration, PostgreSQL and frontend state management. Every significant
 decision is written down — see [Documentation](#documentation).
 
-## Status
-
-**Sprint 1 complete: the Users module.** Registration, login, JWT with rotating refresh
-tokens, system roles and claim-based authorization, behind a modular monolith skeleton with
-architecture tests and 64 passing tests.
-
-| Sprint | Scope | Status |
-|---|---|---|
-| 1 | Identity and authentication | Done |
-| 2 | Projects and membership | Next |
-| 3 | Kanban boards, columns, tasks | |
-| 4 | Task movement and concurrency | |
-| 5 | Real-time collaboration (SignalR) | |
-| 6 | React frontend | |
-| 7 | Concurrency and polish | |
-| 8 | Deployment | |
-
 ## Running locally
 
 Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download) and Docker.
@@ -52,7 +35,7 @@ user — with the expected status code on each request explained.
 dotnet test src/backend/TeamProjectBoard.slnx
 ```
 
-64 tests. The integration tests start a real Postgres via Testcontainers, so Docker must be
+The integration tests start a real Postgres via Testcontainers, so Docker must be
 running. The architecture tests need nothing and run in about a second:
 
 ```bash

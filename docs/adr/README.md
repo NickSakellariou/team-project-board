@@ -23,7 +23,6 @@ ADR links to the relevant note.
 | [0009](0009-claim-based-authorization.md) | Claim-based policies contributed per module | Accepted |
 | [0010](0010-aspire-for-local-orchestration.md) | .NET Aspire for local orchestration | Accepted |
 | [0011](0011-architecture-tests.md) | NetArchTest to enforce module boundaries | Accepted |
-| [0012](0012-module-and-project-naming.md) | Module named `Users`; projects suffixed `.Features` | Accepted |
 
 ## Template
 
