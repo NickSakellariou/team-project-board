@@ -90,9 +90,7 @@ to a correct one at a glance.
 ### Why NSubstitute and not Moq
 
 Mostly taste; both work. NSubstitute's syntax is lighter (`sub.Method().Returns(x)` rather
-than `mock.Setup(m => m.Method()).Returns(x)`) and it matches both reference repos. The
-project's `CLAUDE.md` originally said Moq; it now says NSubstitute, because two names for
-one job in a convention document is worse than either choice.
+than `mock.Setup(m => m.Method()).Returns(x)`) and it matches both reference repos.
 
 ## Integration tests
 

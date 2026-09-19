@@ -130,8 +130,7 @@ With one service this looks like indirection for its own sake, and honestly it i
 kept because it is where a SignalR service or a background worker would plug in later, and
 because it is the shape Aspire tooling expects.
 
-**One thing is deliberately absent: OpenTelemetry.** The stock Aspire template configures
-it here. Ours does not, because our modules need tracing to include their own activity
+**One thing is deliberately absent: OpenTelemetry.** Because our modules need tracing to include their own activity
 sources and Npgsql, so it all lives in one place — `AddCoreInfrastructure`. Configuring it
 in both would register the instrumentation twice and duplicate every span. The comment at
 the top of `ServiceDefaultsExtensions` says so, because the absence is otherwise the kind
