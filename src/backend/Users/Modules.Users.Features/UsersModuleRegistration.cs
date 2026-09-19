@@ -1,7 +1,9 @@
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
+using Modules.Common.API.Extensions;
 using Modules.Common.Application.Extensions;
 using Modules.Users.Features.InternalApi;
+using Modules.Users.Infrastructure;
 using Modules.Users.PublicApi;
 
 // ReSharper disable once CheckNamespace

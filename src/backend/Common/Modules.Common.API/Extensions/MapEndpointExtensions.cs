@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Modules.Common.API.Abstractions;
 
-// Why this namespace on a file under Modules.Common.API: extension methods on
-// IServiceCollection conventionally live in Microsoft.Extensions.DependencyInjection so
-// they appear in IntelliSense in Program.cs without an extra using directive. The file
-// still belongs to this project; only the namespace is borrowed.
-// ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Modules.Common.API.Extensions;
 
 /// <summary>
 /// Discovers and maps <see cref="IApiEndpoint"/> implementations.

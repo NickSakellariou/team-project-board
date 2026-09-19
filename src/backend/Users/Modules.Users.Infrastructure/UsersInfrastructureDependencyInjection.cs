@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Modules.Common.Infrastructure.Database;
 using Modules.Common.Infrastructure.Policies;
 using Modules.Users.Domain.Authentication;
@@ -9,8 +10,7 @@ using Modules.Users.Infrastructure.Authorization;
 using Modules.Users.Infrastructure.Database;
 using Modules.Users.Infrastructure.Policies;
 
-// ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Modules.Users.Infrastructure;
 
 /// <summary>
 /// Registers the Users module's infrastructure: database, Identity and authentication.
