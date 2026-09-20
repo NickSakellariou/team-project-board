@@ -122,6 +122,14 @@ internal sealed class AuthenticationService(
         return await IssueTokensAsync(user, storedToken, cancellationToken);
     }
 
+    /// <summary>
+    /// Turns the token's own verdict into an error, and performs the one reaction a
+    /// verdict calls for.
+    /// </summary>
+    /// <remarks>
+    /// The rules themselves live on <see cref="RefreshToken.CanBeRedeemedBy"/>. What is
+    /// left here is what only a service can do: log, and cut off a compromised chain.
+    /// </remarks>
     private async Task<Error?> ValidateStoredTokenAsync(
         RefreshToken? storedToken,
         string jwtId,
@@ -130,49 +138,38 @@ internal sealed class AuthenticationService(
     {
         if (storedToken is null)
         {
+            // Not a rule about a token — there is no token — so it stays out of the entity.
             logger.LogWarning("Refresh attempted with an unknown token for user {UserId}", userId);
             return UserErrors.InvalidToken();
         }
 
-        if (storedToken.Used)
+        switch (storedToken.CanBeRedeemedBy(jwtId, userId, DateTime.UtcNow))
         {
-            // A used token coming back means either a buggy client or a stolen token being
-            // replayed. We cannot tell which, so we assume the worst and cut off the whole
-            // chain: the legitimate user is logged out and has to sign in again, which is
-            // the right trade against leaving an attacker's session alive.
-            logger.LogWarning(
-                "Refresh token replay detected for user {UserId}. Invalidating all of their tokens.",
-                storedToken.UserId);
+            case RefreshTokenRedemption.Allowed:
+                return null;
 
-            await InvalidateAllTokensForUserAsync(storedToken.UserId, cancellationToken);
+            case RefreshTokenRedemption.Replayed:
+                // A used token coming back means either a buggy client or a stolen token
+                // being replayed. We cannot tell which, so we assume the worst and cut off
+                // the whole chain: the legitimate user is logged out and has to sign in
+                // again, which is the right trade against leaving an attacker's session alive.
+                logger.LogWarning(
+                    "Refresh token replay detected for user {UserId}. Invalidating all of their tokens.",
+                    storedToken.UserId);
 
-            return UserErrors.InvalidToken();
+                await InvalidateAllTokensForUserAsync(storedToken.UserId, cancellationToken);
+
+                return UserErrors.InvalidToken();
+
+            case RefreshTokenRedemption.WrongAccessToken:
+                logger.LogWarning("Refresh token does not match the supplied access token for user {UserId}", userId);
+                return UserErrors.InvalidToken();
+
+            default:
+                // Invalidated, Expired and WrongUser are ordinary rejections: the client is
+                // told the same thing as every other failure, and there is nothing to do.
+                return UserErrors.InvalidToken();
         }
-
-        if (storedToken.Invalidated)
-        {
-            return UserErrors.InvalidToken();
-        }
-
-        if (storedToken.ExpiryDateUtc <= DateTime.UtcNow)
-        {
-            return UserErrors.InvalidToken();
-        }
-
-        // Binds the refresh token to the exact access token it was issued with, so a
-        // refresh token from one session cannot renew another session's access token.
-        if (!string.Equals(storedToken.JwtId, jwtId, StringComparison.Ordinal))
-        {
-            logger.LogWarning("Refresh token does not match the supplied access token for user {UserId}", userId);
-            return UserErrors.InvalidToken();
-        }
-
-        if (!string.Equals(storedToken.UserId, userId, StringComparison.Ordinal))
-        {
-            return UserErrors.InvalidToken();
-        }
-
-        return null;
     }
 
     private async Task<AuthenticationTokens> IssueTokensAsync(
@@ -189,7 +186,7 @@ internal sealed class AuthenticationService(
         // is detectable. See RefreshToken's remarks.
         if (previousRefreshToken is not null)
         {
-            previousRefreshToken.Used = true;
+            previousRefreshToken.MarkUsed();
         }
 
         var refreshToken = new RefreshToken
