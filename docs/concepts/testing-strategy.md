@@ -1,16 +1,5 @@
 # Testing Strategy
 
-## The four suites
-
-| Suite | Count | Needs | Speed | Catches |
-|---|---|---|---|---|
-| `Modules.Common.Tests.Architecture` | 12 | nothing | ~1s | boundary and convention violations |
-| `Modules.Common.Tests.Unit` | 14 | nothing | ~150ms | bugs in `Result<T>` |
-| `Modules.Users.Tests.Unit` | 18 | nothing | ~600ms | handler and validator logic |
-| `Modules.Users.Tests.Integration` | 20 | Docker | ~13s | wiring, auth, SQL, serialization |
-
-Each catches a class of bug the others structurally cannot. That is the reason for four
-rather than one.
 
 ## Architecture tests
 
@@ -86,6 +75,27 @@ that interface, but it is a real one.
 Validators are the easiest thing in the codebase to test — pure functions over a request
 object — and among the easiest to get subtly wrong, since an inverted rule looks identical
 to a correct one at a glance.
+
+### Substituting Identity's managers
+
+Most handlers do not take a tidy interface — they take `UserManager<User>`, which is a
+class. NSubstitute can still stand in for it, because the methods the handlers call are
+virtual, but it has to call a real constructor first. `IdentitySubstitutes` supplies a
+substitute store and passes null for everything else:
+
+```csharp
+Substitute.For<UserManager<User>>(
+    Substitute.For<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+```
+
+This is the one concession these tests make to Identity being a framework. It buys the
+rules that are otherwise unreachable without a database: `UpdateUserRoleHandler` removing
+the old role *before* adding the new one, and never adding it if the removal failed;
+`RegisterUserHandler` deleting the account it just created when the default role cannot be
+assigned; the self-delete and self-role-change guards short-circuiting before any write.
+
+Each of those was checked by breaking the handler and watching the suite go red, the same
+way the architecture tests were.
 
 ### Why NSubstitute and not Moq
 
