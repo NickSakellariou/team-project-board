@@ -13,9 +13,20 @@ public abstract class BaseApiTest(UsersApiFactory factory) : IAsyncLifetime
     /// <summary>An HttpClient wired into the in-memory application.</summary>
     protected HttpClient Client { get; private set; } = null!;
 
+    /// <summary>
+    /// The running application, for the few tests that need to look behind the API.
+    /// </summary>
+    /// <remarks>
+    /// Reach for this sparingly. These tests are written as a client, and a client sees
+    /// only HTTP — asserting on rows is how a suite ends up passing while the response a
+    /// caller receives is wrong. It earns its place for auditing, where the whole point is
+    /// a column no endpoint returns.
+    /// </remarks>
+    protected UsersApiFactory Factory { get; } = factory;
+
     public Task InitializeAsync()
     {
-        Client = factory.CreateClient();
+        Client = Factory.CreateClient();
         return Task.CompletedTask;
     }
 
@@ -23,7 +34,7 @@ public abstract class BaseApiTest(UsersApiFactory factory) : IAsyncLifetime
     public async Task DisposeAsync()
     {
         Client.Dispose();
-        await factory.ResetDatabaseAsync();
+        await Factory.ResetDatabaseAsync();
     }
 
     /// <summary>Registers a user and returns the created record.</summary>

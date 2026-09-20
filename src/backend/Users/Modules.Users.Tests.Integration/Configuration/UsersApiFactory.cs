@@ -30,6 +30,17 @@ namespace Modules.Users.Tests.Integration.Configuration;
 /// </remarks>
 public sealed class UsersApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    /// <summary>The key the application signs and validates access tokens with.</summary>
+    /// <remarks>
+    /// A constant rather than a literal in <c>ConfigureWebHost</c> because
+    /// <c>TokenSecurityTests</c> forges tokens with it: a test that re-signs a token with
+    /// a different key has to know the real one to prove the difference matters.
+    /// </remarks>
+    public const string SigningKey = "integration-test-signing-key-long-enough-for-hmac-sha256";
+
+    /// <summary>The issuer and audience the application expects.</summary>
+    public const string TokenIssuer = "TeamProjectBoard";
+
     // Pinning the image version matters: "postgres:latest" would mean a test suite that
     // starts failing one morning because the tag moved.
     private readonly PostgreSqlContainer _database = new PostgreSqlBuilder("postgres:17-alpine")
@@ -52,9 +63,9 @@ public sealed class UsersApiFactory : WebApplicationFactory<Program>, IAsyncLife
         builder.UseSetting("ConnectionStrings:teamprojectboard", _database.GetConnectionString());
 
         // Supplied here rather than from the AppHost, which is not running in a test.
-        builder.UseSetting("AuthConfiguration:Key", "integration-test-signing-key-long-enough-for-hmac-sha256");
-        builder.UseSetting("AuthConfiguration:Issuer", "TeamProjectBoard");
-        builder.UseSetting("AuthConfiguration:Audience", "TeamProjectBoard");
+        builder.UseSetting("AuthConfiguration:Key", SigningKey);
+        builder.UseSetting("AuthConfiguration:Issuer", TokenIssuer);
+        builder.UseSetting("AuthConfiguration:Audience", TokenIssuer);
         builder.UseSetting("Seed:AdminEmail", TestUsers.AdminEmail);
         builder.UseSetting("Seed:AdminPassword", TestUsers.AdminPassword);
     }

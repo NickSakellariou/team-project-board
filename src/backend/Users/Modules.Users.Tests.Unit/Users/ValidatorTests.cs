@@ -1,5 +1,7 @@
 using Modules.Users.Features.Users.LoginUser;
+using Modules.Users.Features.Users.RefreshToken;
 using Modules.Users.Features.Users.RegisterUser;
+using Modules.Users.Features.Users.UpdateUser;
 using Modules.Users.Features.Users.UpdateUserRole;
 
 namespace Modules.Users.Tests.Unit.Users;
@@ -17,6 +19,8 @@ public class ValidatorTests
     private readonly RegisterUserRequestValidator _registerValidator = new();
     private readonly LoginUserRequestValidator _loginValidator = new();
     private readonly UpdateUserRoleRequestValidator _roleValidator = new();
+    private readonly UpdateUserRequestValidator _updateValidator = new();
+    private readonly RefreshTokenRequestValidator _refreshValidator = new();
 
     [Fact]
     public void RegisterUser_WithValidRequest_Passes()
@@ -79,5 +83,55 @@ public class ValidatorTests
         var result = _roleValidator.Validate(new UpdateUserRoleRequest(role));
 
         Assert.Equal(expectedValid, result.IsValid);
+    }
+
+    [Fact]
+    public void UpdateUser_WithAValidDisplayName_Passes()
+    {
+        Assert.True(_updateValidator.Validate(new UpdateUserRequest("Nick")).IsValid);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void UpdateUser_WithABlankDisplayName_Fails(string displayName)
+    {
+        // A whitespace-only name passes a naive null check and then renders as an empty
+        // label everywhere the frontend shows it.
+        Assert.False(_updateValidator.Validate(new UpdateUserRequest(displayName)).IsValid);
+    }
+
+    [Fact]
+    public void UpdateUser_AtTheLengthLimit_Passes()
+    {
+        // The boundary in both directions, because an off-by-one here is invisible until
+        // someone with a long name is rejected.
+        Assert.True(_updateValidator.Validate(new UpdateUserRequest(new string('a', 128))).IsValid);
+    }
+
+    [Fact]
+    public void UpdateUser_PastTheLengthLimit_Fails()
+    {
+        Assert.False(_updateValidator.Validate(new UpdateUserRequest(new string('a', 129))).IsValid);
+    }
+
+    [Fact]
+    public void RefreshToken_WithBothTokens_Passes()
+    {
+        Assert.True(_refreshValidator.Validate(new RefreshTokenRequest("access", "refresh")).IsValid);
+    }
+
+    [Theory]
+    [InlineData("", "refresh")]
+    [InlineData("access", "")]
+    [InlineData("", "")]
+    public void RefreshToken_WithAMissingToken_Fails(string accessToken, string refreshToken)
+    {
+        // Both halves are required. Letting an empty access token through would send it to
+        // the signature check, which rejects it anyway — but as a generic failure, after
+        // the work of parsing it.
+        var result = _refreshValidator.Validate(new RefreshTokenRequest(accessToken, refreshToken));
+
+        Assert.False(result.IsValid);
     }
 }

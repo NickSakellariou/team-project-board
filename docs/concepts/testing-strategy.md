@@ -171,12 +171,36 @@ Worth recording because the symptom is characteristic of shared fixtures: **test
 individually and fail together.** When you see that, suspect shared state before suspecting
 the code under test.
 
+## Attacking the refresh endpoint
+
+`TokenSecurityTests` is the one place the suite plays attacker rather than client. The
+refresh endpoint accepts an *expired* access token by design, so its lifetime check is
+switched off and the signature is all that stands between a caller and a new session.
+
+Each test forges an access token and asks for a fresh pair: re-signed under HS384 with the
+server's own key, signed with a different key, and unsigned (`"alg": "none"`). A fourth
+checks that a rejected attempt does not spend the real refresh token — otherwise anyone
+able to send one forged request could log a user out, a denial of service built out of the
+replay protection itself.
+
+These are integration tests because reaching `GetPrincipalFromExpiredToken` directly means
+constructing an `AuthenticationService` with a database, a `UserManager` and a
+`RoleManager` — at which point what is being proved is no longer that the running
+application rejects the token.
+
 ## What is not tested, and why
 
 - **`AuthenticationService` has no unit tests.** It is almost entirely calls into Identity
   and the JWT library; a unit test would substitute both and end up asserting that the
   mocks were called. The integration tests cover its real behaviour — rotation, replay
-  detection, expiry — through HTTP, which is where it actually matters.
+  detection, expiry, forged signatures — through HTTP, which is where it actually matters.
+- **Account lockout is never exercised end to end.** `LoginUserHandlerTests` substitutes
+  the locked-out result, so the handler's response is covered but the Identity options
+  that decide *when* an account locks are not.
+- **`InvalidateAllTokensForUserAsync` leaves the audit columns alone.** It uses
+  `ExecuteUpdateAsync`, which bypasses the change tracker and therefore the interceptor, so
+  a token invalidated by a detected replay has no `UpdatedAtUtc`. Known, untested, and
+  worth deciding on rather than discovering from a confusing audit trail.
 - **No tests for the Common infrastructure DI.** If it were wrong, every integration test
   would fail.
 - **No load or performance tests.** Nothing to compare against yet.

@@ -121,6 +121,93 @@ public class UserAuthorizationTests(UsersApiFactory factory) : BaseApiTest(facto
     }
 
     [Fact]
+    public async Task DeleteUser_AsAnOrdinaryUser_ReturnsForbidden()
+    {
+        var other = await RegisterAsync("other@example.com", displayName: "Other");
+        await RegisterAsync();
+
+        var tokens = await LoginAsync();
+        Authenticate(tokens.AccessToken);
+
+        var response = await Client.DeleteAsync(new Uri($"/api/users/{other.Id}", UriKind.Relative));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteUser_AsAnOrdinaryUser_LeavesTheTargetIntact()
+    {
+        var other = await RegisterAsync("other@example.com", displayName: "Other");
+        await RegisterAsync();
+
+        var tokens = await LoginAsync();
+        Authenticate(tokens.AccessToken);
+
+        await Client.DeleteAsync(new Uri($"/api/users/{other.Id}", UriKind.Relative));
+
+        // A 403 that still performed the delete is the failure mode worth ruling out:
+        // authorization that runs after the work is authorization in name only.
+        await AuthenticateAsAdminAsync();
+        var target = await Client.GetAsync(new Uri($"/api/users/{other.Id}", UriKind.Relative));
+
+        Assert.Equal(HttpStatusCode.OK, target.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteUser_ForAnUnknownId_ReturnsNotFound()
+    {
+        await AuthenticateAsAdminAsync();
+
+        var response = await Client.DeleteAsync(
+            new Uri($"/api/users/{Guid.NewGuid()}", UriKind.Relative));
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateUser_AsAnOrdinaryUser_ReturnsForbidden()
+    {
+        var other = await RegisterAsync("other@example.com", displayName: "Other");
+        await RegisterAsync();
+
+        var tokens = await LoginAsync();
+        Authenticate(tokens.AccessToken);
+
+        var response = await Client.PutAsJsonAsync(
+            $"/api/users/{other.Id}",
+            new UpdateUserRequest("Renamed By Someone Else"));
+
+        // Note what this means today: the endpoint requires users:update, so an ordinary
+        // user cannot edit their own profile either. Deliberate for now — there is no
+        // self-service profile endpoint — and worth failing loudly if that ever changes.
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateUser_ForAnUnknownId_ReturnsNotFound()
+    {
+        await AuthenticateAsAdminAsync();
+
+        var response = await Client.PutAsJsonAsync(
+            $"/api/users/{Guid.NewGuid()}",
+            new UpdateUserRequest("Renamed"));
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateUser_WithABlankDisplayName_ReturnsBadRequest()
+    {
+        var target = await RegisterAsync();
+        await AuthenticateAsAdminAsync();
+
+        var response = await Client.PutAsJsonAsync($"/api/users/{target.Id}", new UpdateUserRequest(""));
+
+        // Proves the validator is actually wired into the endpoint, not merely written.
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task UpdateUser_AsAnAdmin_ChangesTheDisplayName()
     {
         var target = await RegisterAsync();

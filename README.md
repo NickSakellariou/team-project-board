@@ -42,6 +42,10 @@ running. The architecture tests need nothing and run in about a second:
 dotnet test src/backend/Common/Modules.Common.Tests.Architecture
 ```
 
+The same build and test run on every pull request — see
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml). It builds in Release, where
+`TreatWarningsAsErrors` makes an analyzer warning a failure.
+
 ## Features
 
 The MVP:

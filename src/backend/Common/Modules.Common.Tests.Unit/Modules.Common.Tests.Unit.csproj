@@ -15,6 +15,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Modules.Common.Domain\Modules.Common.Domain.csproj" />
+        <!-- For EndpointResultsExtensions, the one place that turns a domain Error into an
+             HTTP status code. It brings ASP.NET Core in transitively, which is why it is
+             the only non-Domain reference here. -->
+        <ProjectReference Include="..\Modules.Common.API\Modules.Common.API.csproj" />
     </ItemGroup>
 
 </Project>
