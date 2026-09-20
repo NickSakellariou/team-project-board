@@ -7,9 +7,18 @@ namespace Modules.Users.Domain.Errors;
 /// Every failure the Users module can return.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Collecting them in one file means the module's complete failure surface is readable at
 /// a glance, error codes stay consistent (<c>Users.Something</c>), and the wording of a
 /// message is changed in one place rather than hunted through handlers.
+/// </para>
+/// <para>
+/// It sits in Domain rather than Features because these are statements about users, not
+/// about a use case: <see cref="InvalidCredentials"/> is raised from Infrastructure and
+/// <see cref="NotFound"/> from four separate slices. Domain is the one layer all of them
+/// can see. Failures that are not about users — an unauthenticated request, say — belong
+/// in <see cref="Modules.Common.Domain.Errors.RequestErrors"/> instead.
+/// </para>
 /// </remarks>
 public static class UserErrors
 {
@@ -18,14 +27,6 @@ public static class UserErrors
     /// <summary>The user id does not exist.</summary>
     public static Error NotFound(string userId) =>
         Error.NotFound($"{Prefix}.{nameof(NotFound)}", $"User '{userId}' was not found.");
-
-    /// <summary>No account uses that email address.</summary>
-    public static Error NotFoundByEmail(string email) =>
-        Error.NotFound($"{Prefix}.{nameof(NotFoundByEmail)}", $"No user found with email '{email}'.");
-
-    /// <summary>The request is not authenticated, or the token carries no user id.</summary>
-    public static Error NotAuthenticated() =>
-        Error.Unauthorized($"{Prefix}.{nameof(NotAuthenticated)}", "The request is not authenticated.");
 
     /// <summary>
     /// The email or password is wrong.
@@ -49,6 +50,26 @@ public static class UserErrors
     /// <summary>The named role does not exist.</summary>
     public static Error RoleNotFound(string roleName) =>
         Error.NotFound($"{Prefix}.{nameof(RoleNotFound)}", $"Role '{roleName}' was not found.");
+
+    /// <summary>
+    /// An admin tried to delete their own account.
+    /// </summary>
+    /// <remarks>
+    /// Not paternalism — it is the cheapest guard against an organisation locking itself
+    /// out by removing its last admin.
+    /// </remarks>
+    public static Error CannotDeleteSelf() =>
+        Error.Conflict($"{Prefix}.{nameof(CannotDeleteSelf)}", "You cannot delete your own account.");
+
+    /// <summary>
+    /// An admin tried to change their own system role.
+    /// </summary>
+    /// <remarks>
+    /// The same lockout guard as <see cref="CannotDeleteSelf"/>: a last admin who demotes
+    /// themselves leaves nobody able to promote anyone.
+    /// </remarks>
+    public static Error CannotChangeOwnRole() =>
+        Error.Conflict($"{Prefix}.{nameof(CannotChangeOwnRole)}", "You cannot change your own role.");
 
     /// <summary>Registration failed, e.g. the email is taken or the password is too weak.</summary>
     public static Error RegistrationFailed(IEnumerable<IdentityError> identityErrors) =>

@@ -33,7 +33,7 @@ internal sealed class DeleteUserHandler(
     {
         if (string.Equals(userId, callerId, StringComparison.Ordinal))
         {
-            return Error.Conflict("Users.CannotDeleteSelf", "You cannot delete your own account.");
+            return UserErrors.CannotDeleteSelf();
         }
 
         var user = await userManager.FindByIdAsync(userId);

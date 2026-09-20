@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Modules.Common.API.Abstractions;
 using Modules.Common.API.Extensions;
-using Modules.Users.Domain.Errors;
+using Modules.Common.Domain.Errors;
 using Modules.Users.Domain.Policies;
 using Modules.Users.Features.Users.Shared;
 using Modules.Users.Features.Users.Shared.Routes;
@@ -59,7 +59,7 @@ public sealed class UpdateUserRoleEndpoint : IApiEndpoint
         var callerId = principal.GetUserId();
         if (string.IsNullOrEmpty(callerId))
         {
-            return UserErrors.NotAuthenticated().ToProblemResult();
+            return RequestErrors.NotAuthenticated().ToProblemResult();
         }
 
         var result = await handler.HandleAsync(userId, callerId, request, cancellationToken);

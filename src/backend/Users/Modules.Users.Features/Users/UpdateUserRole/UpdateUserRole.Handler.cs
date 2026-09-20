@@ -41,7 +41,7 @@ internal sealed class UpdateUserRoleHandler(
     {
         if (string.Equals(userId, callerId, StringComparison.Ordinal))
         {
-            return Error.Conflict("Users.CannotChangeOwnRole", "You cannot change your own role.");
+            return UserErrors.CannotChangeOwnRole();
         }
 
         if (!await roleManager.RoleExistsAsync(request.Role))

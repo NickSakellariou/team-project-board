@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Modules.Common.API.Abstractions;
 using Modules.Common.API.Extensions;
-using Modules.Users.Domain.Errors;
+using Modules.Common.Domain.Errors;
 using Modules.Users.Features.Users.Shared;
 using Modules.Users.Features.Users.Shared.Routes;
 
@@ -46,7 +46,7 @@ public sealed class GetCurrentUserEndpoint : IApiEndpoint
             // callers. It fires only if a token validated but carried no user id, which
             // would mean a bug in token creation — worth failing loudly rather than
             // dereferencing null.
-            return UserErrors.NotAuthenticated().ToProblemResult();
+            return RequestErrors.NotAuthenticated().ToProblemResult();
         }
 
         var result = await handler.HandleAsync(userId, cancellationToken);

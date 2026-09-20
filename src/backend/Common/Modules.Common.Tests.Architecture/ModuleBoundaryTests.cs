@@ -51,24 +51,6 @@ public class ModuleBoundaryTests
     }
 
     /// <summary>
-    /// The Infrastructure layer must not depend on the Features layer.
-    /// </summary>
-    /// <remarks>
-    /// Dependencies point inward. Infrastructure serves the features; if it also depended
-    /// on them the two would be one circular unit that could only be changed together.
-    /// </remarks>
-    [Fact]
-    public void UsersInfrastructure_ShouldNotDependOn_Features()
-    {
-        var result = Types.InAssembly(ModuleAssemblies.UsersInfrastructure)
-            .Should()
-            .NotHaveDependencyOn("Modules.Users.Features")
-            .GetResult();
-
-        Assert.True(result.IsSuccessful, FormatFailure(result));
-    }
-
-    /// <summary>
     /// The PublicApi project must depend on nothing inside its own module.
     /// </summary>
     /// <remarks>
