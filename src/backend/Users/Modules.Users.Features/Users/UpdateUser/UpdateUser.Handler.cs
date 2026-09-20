@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Modules.Common.Domain.Handlers;
 using Modules.Common.Domain.Results;
 using Modules.Users.Domain.Errors;
+using Modules.Users.Domain.Logging;
 using Modules.Users.Domain.Users;
 using Modules.Users.Features.Users.Shared;
 
@@ -45,7 +46,7 @@ internal sealed class UpdateUserHandler(
             return UserErrors.UpdateFailed(updateResult.Errors);
         }
 
-        logger.LogInformation("Updated profile for user {UserId}", user.Id);
+        logger.UserProfileUpdated(user.Id);
 
         var roles = await userManager.GetRolesAsync(user);
 

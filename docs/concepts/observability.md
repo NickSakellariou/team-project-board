@@ -44,6 +44,35 @@ PascalCase (`{UserId}`), unlike C# parameters — they are field names in the lo
 and silently destroys the structure, which is why it is easy to get wrong and worth
 watching for in review.
 
+### Where the templates actually live
+
+Neither line above is what you will find at a call site. A template written inline is
+anonymous — the only handle on it is its text, so rewording it breaks every saved query
+built on it, silently. So every event is declared once, in a catalogue class, and given a
+permanent numeric id:
+
+```csharp
+// Users/Modules.Users.Domain/Logging/UserLogs.cs
+[LoggerMessage(
+    EventId = 10_003,
+    Level = LogLevel.Information,
+    Message = "User {UserId} signed in")]
+public static partial void UserSignedIn(this ILogger logger, string userId);
+```
+
+```csharp
+// the call site
+logger.UserSignedIn(user.Id);
+```
+
+The source generator writes the implementation, so the call site is cheaper than the
+`params object[]` overload as well as being greppable. `CA1848` is an error in
+`.editorconfig`, so a bare `logger.LogInformation(...)` does not compile — that is what
+keeps the catalogues complete.
+
+[log-event-ids.md](../log-event-ids.md) has the id ranges, what every allocated id means,
+and what enforces it.
+
 ### Serilog
 
 Replaces the default logger, configured from `appsettings.json` so levels and destinations
@@ -166,5 +195,6 @@ The traces tab is the one that changes how you debug.
 
 ## Related
 
+- [../log-event-ids.md](../log-event-ids.md) — the id ranges and every allocated event
 - [aspire.md](aspire.md) — the dashboard that receives all this
 - [ef-core-basics.md](ef-core-basics.md) — where the SQL spans come from

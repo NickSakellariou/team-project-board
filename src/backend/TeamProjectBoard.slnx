@@ -17,5 +17,6 @@
   </Folder>
   <Project Path="TeamProjectBoard.AppHost/TeamProjectBoard.AppHost.csproj" />
   <Project Path="TeamProjectBoard.Host/TeamProjectBoard.Host.csproj" />
+  <Project Path="TeamProjectBoard.Host.Tests.Unit/TeamProjectBoard.Host.Tests.Unit.csproj" />
   <Project Path="TeamProjectBoard.ServiceDefaults/TeamProjectBoard.ServiceDefaults.csproj" />
 </Solution>

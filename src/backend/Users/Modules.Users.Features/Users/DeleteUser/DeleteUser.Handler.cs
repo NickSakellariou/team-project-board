@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Modules.Common.Domain.Handlers;
 using Modules.Common.Domain.Results;
 using Modules.Users.Domain.Errors;
+using Modules.Users.Domain.Logging;
 using Modules.Users.Domain.Users;
 
 namespace Modules.Users.Features.Users.DeleteUser;
@@ -50,7 +51,7 @@ internal sealed class DeleteUserHandler(
 
         // The user's refresh tokens go with them: the foreign key in
         // RefreshTokenConfiguration cascades, so no token survives to be redeemed.
-        logger.LogInformation("User {UserId} was deleted by {CallerId}", userId, callerId);
+        logger.UserDeleted(userId, callerId);
 
         return Result.Success;
     }

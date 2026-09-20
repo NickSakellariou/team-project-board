@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Modules.Common.Domain.Handlers;
 using Modules.Common.Domain.Results;
 using Modules.Users.Domain.Errors;
+using Modules.Users.Domain.Logging;
 using Modules.Users.Domain.Users;
 using Modules.Users.Features.Users.Shared;
 
@@ -50,8 +51,7 @@ internal sealed class RegisterUserHandler(
         var createResult = await userManager.CreateAsync(user, request.Password);
         if (!createResult.Succeeded)
         {
-            logger.LogInformation(
-                "Registration rejected for {Email}: {IdentityErrors}",
+            logger.RegistrationRejected(
                 request.Email,
                 string.Join(", ", createResult.Errors.Select(error => error.Code)));
 
@@ -70,14 +70,12 @@ internal sealed class RegisterUserHandler(
             // which means the application is misconfigured anyway.
             await userManager.DeleteAsync(user);
 
-            logger.LogError(
-                "Created user {UserId} but could not assign the default role. The account was rolled back.",
-                user.Id);
+            logger.DefaultRoleAssignmentFailed(user.Id);
 
             return UserErrors.RegistrationFailed(roleResult.Errors);
         }
 
-        logger.LogInformation("Registered user {UserId}", user.Id);
+        logger.UserRegistered(user.Id);
 
         return new UserResponse(user.Id, user.Email!, user.DisplayName, [SystemRoles.User]);
     }

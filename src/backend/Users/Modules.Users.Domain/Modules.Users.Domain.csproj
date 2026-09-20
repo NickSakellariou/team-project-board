@@ -12,8 +12,16 @@
       to a persistence model at the boundary. We accept the coupling — see
       docs/adr/0008-identity-and-jwt.md for what it buys and what it costs.
     -->
+    <!--
+      Microsoft.Extensions.Logging.Abstractions is the ILogger interface and nothing else -
+      no sinks, no configuration, no hosting. It is here so Domain/Logging/UserLogs.cs can
+      declare the module's log events in one place, the way Domain/Errors/UserErrors.cs
+      declares its failures: Features and Infrastructure both emit them, and Domain is the
+      only layer both can see.
+    -->
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     </ItemGroup>
 
     <ItemGroup>

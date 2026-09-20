@@ -1,5 +1,6 @@
 using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
+using Modules.Common.Application.Logging;
 
 namespace Modules.Common.Application.Extensions;
 
@@ -38,12 +39,6 @@ public static class ValidationExtensions
 
         var validationErrors = validationResult.ToFormattedErrorMessages();
 
-        // Why the {Placeholder} form rather than string interpolation: Serilog captures
-        // ContextMessage and Errors as separate structured fields, so logs stay queryable
-        // ("show me every failed registration") instead of being flat text.
-        logger.LogWarning(
-            "{ContextMessage}: {ValidationErrors}",
-            contextMessage,
-            string.Join(", ", validationErrors));
+        logger.ValidationFailed(contextMessage, string.Join(", ", validationErrors));
     }
 }

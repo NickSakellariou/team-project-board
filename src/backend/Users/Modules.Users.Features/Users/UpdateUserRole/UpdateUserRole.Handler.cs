@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Modules.Common.Domain.Handlers;
 using Modules.Common.Domain.Results;
 using Modules.Users.Domain.Errors;
+using Modules.Users.Domain.Logging;
 using Modules.Users.Domain.Users;
 using Modules.Users.Features.Users.Shared;
 
@@ -79,11 +80,7 @@ internal sealed class UpdateUserRoleHandler(
         // token, which is still valid. They keep their old permissions until it expires —
         // up to AccessTokenMinutes. That is the cost of stateless tokens, and the reason
         // the access-token lifetime is short.
-        logger.LogInformation(
-            "User {UserId} role changed to {Role} by {CallerId}",
-            userId,
-            request.Role,
-            callerId);
+        logger.UserRoleChanged(userId, request.Role, callerId);
 
         return new UserResponse(user.Id, user.Email!, user.DisplayName, [request.Role]);
     }

@@ -100,17 +100,20 @@ dotnet_diagnostic.CA1000.severity = none
 dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.MA0004.severity = none
 
-# CA1848: "use LoggerMessage delegates" — sound advice for a hot path, because the
-# params object[] overload boxes its arguments on every call. Complying means a partial
-# class and a [LoggerMessage] declaration for every log statement in the codebase. At this
-# scale the allocations are irrelevant and the readability cost is not; revisit if a log
-# statement ever shows up in a profile.
-dotnet_diagnostic.CA1848.severity = none
+# CA1848: "use LoggerMessage delegates" — ON, and load-bearing. Every log event in the
+# solution is declared in a catalogue class (UserLogs, CommonApiLogs, ...) as a
+# [LoggerMessage] method, so that it carries a stable event id, its wording sits beside
+# every other event, and a dashboard built on an id survives a rename. This rule is what
+# stops a bare logger.LogInformation(...) slipping in and quietly creating an event that is
+# in no catalogue, has no id and is covered by no test. See docs/log-event-ids.md and the
+# adding-a-log skill. (The allocation argument the rule itself makes is real but secondary
+# at this scale — the catalogue is the reason.)
+dotnet_diagnostic.CA1848.severity = error
 
 # CA1873: "this log argument may be expensive to evaluate" — fires on any property access
 # inside a log call (user.Id, factory.ModuleName). Complying means wrapping log statements
-# in `if (logger.IsEnabled(...))`. Same trade-off as CA1848 above, and the same answer:
-# the arguments here are field reads, not work.
+# in `if (logger.IsEnabled(...))`, which the generated LoggerMessage methods already do
+# internally. The arguments here are field reads, not work.
 dotnet_diagnostic.CA1873.severity = none
 
 # CA1002 / MA0016: "expose IReadOnlyList<T>, not List<T>" — obeyed everywhere except the
@@ -148,7 +151,10 @@ dotnet_diagnostic.MA0016.severity = none
 
 # CA1707: "identifier contains underscores" — test names use the
 # [Method]_[Scenario]_[ExpectedResult] convention.
-[**/*Tests*/**.cs]
+# Note the leading ** rather than **/: a `**/` prefix needs at least one directory ahead of
+# the match, so it skips test projects that sit at the root of src/backend — which is where
+# TeamProjectBoard.Host.Tests.Unit lives, next to the Host it tests.
+[**Tests*/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 
 # CA1711: "type should not end in Collection" — xUnit's own convention names a collection

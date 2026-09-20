@@ -116,15 +116,19 @@ Other notes cover the [modular monolith](docs/concepts/modular-monolith.md),
 **[docs/adr/](docs/adr/)** records *why each choice was made over the alternatives*, and —
 the part that matters — what each one costs. Twelve decisions so far.
 
+**[docs/log-event-ids.md](docs/log-event-ids.md)** is the reference for the log catalogues:
+which event id range each layer owns, and what every allocated id means.
+
 **[docs/General.md](docs/General.md)** holds the original requirements and the sprint plan.
 
 ## Repository layout
 
 ```
 docs/
-  concepts/       background on the patterns and frameworks
-  adr/            architecture decision records
-  General.md      requirements and sprint plan
+  concepts/         background on the patterns and frameworks
+  adr/              architecture decision records
+  log-event-ids.md  the log catalogues and their event id ranges
+  General.md        requirements and sprint plan
 src/
   backend/        the API (see src/backend/CLAUDE.md for conventions)
     Common/       shared abstractions

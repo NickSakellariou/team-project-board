@@ -51,6 +51,7 @@ Then, depending on what you are doing:
 |---|---|
 | [aspire.md](aspire.md) | What the AppHost does; service discovery; connection-string injection |
 | [observability.md](observability.md) | Logs vs traces vs metrics; OpenTelemetry |
+| [../log-event-ids.md](../log-event-ids.md) | The log catalogues; which ids each layer owns; what every id means |
 | [testing-strategy.md](testing-strategy.md) | Which suite catches which bug; Testcontainers; Respawn |
 
 ## If you are looking for something specific
@@ -62,4 +63,5 @@ Then, depending on what you are doing:
 - *Why is there no `UserService`?* → [cqrs-and-handlers.md](cqrs-and-handlers.md)
 - *Why does my new endpoint 404?* → [minimal-apis-and-endpoints.md](minimal-apis-and-endpoints.md) (check the naming convention)
 - *Why a real Postgres in tests?* → [testing-strategy.md](testing-strategy.md)
+- *Why won't `logger.LogInformation(...)` compile?* → [../log-event-ids.md](../log-event-ids.md)
 - *Where does the connection string come from?* → [aspire.md](aspire.md)

@@ -24,6 +24,10 @@
         <ProjectReference Include="..\..\Users\Modules.Users.Infrastructure\Modules.Users.Infrastructure.csproj" />
         <ProjectReference Include="..\..\Users\Modules.Users.PublicApi\Modules.Users.PublicApi.csproj" />
         <ProjectReference Include="..\Modules.Common.Domain\Modules.Common.Domain.csproj" />
+        <!-- The Host, for the one rule that has to see every log catalogue at once:
+             HostLogs lives there, and its event ids share a single number line with every
+             module's. See LogCatalogueTests and docs/log-event-ids.md. -->
+        <ProjectReference Include="..\..\TeamProjectBoard.Host\TeamProjectBoard.Host.csproj" />
     </ItemGroup>
 
 </Project>

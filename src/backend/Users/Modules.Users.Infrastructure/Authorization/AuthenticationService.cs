@@ -12,6 +12,7 @@ using Modules.Common.Domain.Results;
 using Modules.Common.Infrastructure.Configuration;
 using Modules.Users.Domain.Authentication;
 using Modules.Users.Domain.Errors;
+using Modules.Users.Domain.Logging;
 using Modules.Users.Domain.Tokens;
 using Modules.Users.Domain.Users;
 using Modules.Users.Infrastructure.Database;
@@ -53,13 +54,13 @@ internal sealed class AuthenticationService(
             // are registered. Doing the work regardless keeps the two paths comparable.
             await VerifyPasswordAgainstDummyHashAsync(password);
 
-            logger.LogInformation("Login attempted for unknown email {Email}", email);
+            logger.LoginAttemptedForUnknownEmail(email);
             return UserErrors.InvalidCredentials();
         }
 
         if (await userManager.IsLockedOutAsync(user))
         {
-            logger.LogWarning("Login attempted for locked-out user {UserId}", user.Id);
+            logger.LoginAttemptedForLockedOutUser(user.Id);
             return UserErrors.LockedOut();
         }
 
@@ -70,13 +71,13 @@ internal sealed class AuthenticationService(
             // CheckPasswordAsync only verifies, it does not count.
             await userManager.AccessFailedAsync(user);
 
-            logger.LogInformation("Failed login for user {UserId}", user.Id);
+            logger.LoginFailed(user.Id);
             return UserErrors.InvalidCredentials();
         }
 
         await userManager.ResetAccessFailedCountAsync(user);
 
-        logger.LogInformation("User {UserId} signed in", user.Id);
+        logger.UserSignedIn(user.Id);
 
         return await IssueTokensAsync(user, previousRefreshToken: null, cancellationToken);
     }
@@ -139,7 +140,7 @@ internal sealed class AuthenticationService(
         if (storedToken is null)
         {
             // Not a rule about a token — there is no token — so it stays out of the entity.
-            logger.LogWarning("Refresh attempted with an unknown token for user {UserId}", userId);
+            logger.RefreshTokenNotFound(userId);
             return UserErrors.InvalidToken();
         }
 
@@ -153,16 +154,14 @@ internal sealed class AuthenticationService(
                 // being replayed. We cannot tell which, so we assume the worst and cut off
                 // the whole chain: the legitimate user is logged out and has to sign in
                 // again, which is the right trade against leaving an attacker's session alive.
-                logger.LogWarning(
-                    "Refresh token replay detected for user {UserId}. Invalidating all of their tokens.",
-                    storedToken.UserId);
+                logger.RefreshTokenReplayDetected(storedToken.UserId);
 
                 await InvalidateAllTokensForUserAsync(storedToken.UserId, cancellationToken);
 
                 return UserErrors.InvalidToken();
 
             case RefreshTokenRedemption.WrongAccessToken:
-                logger.LogWarning("Refresh token does not match the supplied access token for user {UserId}", userId);
+                logger.RefreshTokenAccessTokenMismatch(userId);
                 return UserErrors.InvalidToken();
 
             default:
@@ -295,7 +294,7 @@ internal sealed class AuthenticationService(
         }
         catch (SecurityTokenException exception)
         {
-            logger.LogInformation(exception, "Rejected an access token during refresh");
+            logger.AccessTokenRejectedDuringRefresh(exception);
             return null;
         }
     }

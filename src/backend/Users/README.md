@@ -21,7 +21,7 @@ Owns accounts, system roles and authentication. The only module that depends on 
 
 | Project | Contains |
 |---|---|
-| `Modules.Users.Domain` | `User`, `Role`, `RefreshToken`, `UserErrors`, `UserPolicyConsts`, `IAuthenticationService` |
+| `Modules.Users.Domain` | `User`, `Role`, `RefreshToken`, `UserErrors`, `UserLogs`, `UserPolicyConsts`, `IAuthenticationService` |
 | `Modules.Users.Infrastructure` | `UsersDbContext`, EF mappings, migrations, `AuthenticationService`, `UsersPolicyFactory` |
 | `Modules.Users.Features` | The vertical slices, `UserModuleApi`, `AddUsersModule` |
 | `Modules.Users.PublicApi` | `IUserModuleApi` and `UserSummary` — the only things other modules may use |

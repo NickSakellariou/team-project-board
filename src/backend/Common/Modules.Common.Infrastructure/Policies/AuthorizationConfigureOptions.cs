@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Modules.Common.Infrastructure.Logging;
 
 namespace Modules.Common.Infrastructure.Policies;
 
@@ -40,10 +41,7 @@ internal sealed class AuthorizationConfigureOptions(
                 options.AddPolicy(policyName, configurePolicy);
             }
 
-            logger.LogInformation(
-                "Registered {PolicyCount} authorization policies for module {ModuleName}",
-                policyCount,
-                factory.ModuleName);
+            logger.AuthorizationPoliciesRegistered(policyCount, factory.ModuleName);
         }
     }
 }

@@ -45,7 +45,8 @@ src/backend/
     Modules.Users.PublicApi/
     Modules.Users.Tests.Unit/
     Modules.Users.Tests.Integration/
-  TeamProjectBoard.Host/            Program.cs, seeding, .http files
+  TeamProjectBoard.Host/            Program.cs, seeding, log catalogue, .http files
+  TeamProjectBoard.Host.Tests.Unit/ the Host's tests that need no database
   TeamProjectBoard.AppHost/         Aspire orchestration
   TeamProjectBoard.ServiceDefaults/ health checks, service discovery, resilience
 ```
@@ -73,7 +74,8 @@ Features/<Area>/<UseCase>/<UseCase>.Endpoint.cs     request record + IApiEndpoin
 Features/<Area>/<UseCase>/<UseCase>.Handler.cs      I<UseCase>Handler + sealed handler
 Features/<Area>/<UseCase>/<UseCase>.Validator.cs    FluentValidation rules
 Features/<Area>/Shared/Routes/RouteConsts.cs
-Domain/Errors/<Module>Errors.cs
+Domain/Errors/<Module>Errors.cs                    every failure the module can return
+Domain/Logging/<Module>Logs.cs                     every log event the module can emit
 ```
 
 Several types share a slice file on purpose. MA0048 (file name must match type name) is
@@ -98,6 +100,9 @@ disabled for Features projects for exactly this reason.
 - `IPolicyFactory` so each module declares its own authorization policies
 - `IUserModuleApi`-style PublicApi contracts for cross-module calls
 - EF Core `DbContext` directly in handlers
+- One `[LoggerMessage]` log catalogue per project that logs, each event with a permanent
+  event id — `CA1848` is an error, so a bare `logger.LogInformation(...)` will not compile.
+  See `docs/log-event-ids.md` and the `adding-a-log` skill
 
 ## Patterns we do NOT use
 

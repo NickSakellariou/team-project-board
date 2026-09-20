@@ -7,6 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.analyzers" />
         <PackageReference Include="xunit.runner.visualstudio" />
@@ -16,9 +17,13 @@
     <ItemGroup>
         <ProjectReference Include="..\Modules.Common.Domain\Modules.Common.Domain.csproj" />
         <!-- For EndpointResultsExtensions, the one place that turns a domain Error into an
-             HTTP status code. It brings ASP.NET Core in transitively, which is why it is
-             the only non-Domain reference here. -->
+             HTTP status code, and for CommonApiLogs. It brings ASP.NET Core in transitively. -->
         <ProjectReference Include="..\Modules.Common.API\Modules.Common.API.csproj" />
+        <!-- For the other two Common log catalogues: a catalogue and its test file are
+             added together, so every Common.* project ends up referenced here. See
+             docs/log-event-ids.md. -->
+        <ProjectReference Include="..\Modules.Common.Application\Modules.Common.Application.csproj" />
+        <ProjectReference Include="..\Modules.Common.Infrastructure\Modules.Common.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

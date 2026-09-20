@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Modules.Users.Domain.Policies;
 using Modules.Users.Domain.Users;
+using TeamProjectBoard.Host.Logging;
 
 namespace TeamProjectBoard.Host.Seeding;
 
@@ -42,7 +43,7 @@ internal sealed class UserSeedService(
             }
 
             await roleManager.CreateAsync(new Role { Name = roleName });
-            logger.LogInformation("Created role {RoleName}", roleName);
+            logger.RoleCreated(roleName);
         }
     }
 
@@ -71,7 +72,7 @@ internal sealed class UserSeedService(
             }
 
             await roleManager.AddClaimAsync(adminRole, new Claim(permission, "true"));
-            logger.LogInformation("Granted {Permission} to the {RoleName} role", permission, SystemRoles.Admin);
+            logger.PermissionGranted(permission, SystemRoles.Admin);
         }
     }
 
@@ -84,7 +85,7 @@ internal sealed class UserSeedService(
 
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
-            logger.LogInformation("No seed admin configured; skipping.");
+            logger.SeedAdminNotConfigured();
             return;
         }
 
@@ -107,8 +108,7 @@ internal sealed class UserSeedService(
         var createResult = await userManager.CreateAsync(admin, password);
         if (!createResult.Succeeded)
         {
-            logger.LogError(
-                "Could not seed the admin account: {Errors}",
+            logger.SeedAdminCreationFailed(
                 string.Join(", ", createResult.Errors.Select(error => error.Description)));
 
             return;
@@ -116,8 +116,6 @@ internal sealed class UserSeedService(
 
         await userManager.AddToRoleAsync(admin, SystemRoles.Admin);
 
-        logger.LogWarning(
-            "Seeded development admin {Email}. This account exists only in Development.",
-            email);
+        logger.SeededDevelopmentAdmin(email);
     }
 }

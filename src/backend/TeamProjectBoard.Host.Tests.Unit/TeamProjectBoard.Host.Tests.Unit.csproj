@@ -8,19 +8,20 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
-        <PackageReference Include="NSubstitute" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.analyzers" />
         <PackageReference Include="xunit.runner.visualstudio" />
         <PackageReference Include="coverlet.collector" />
     </ItemGroup>
 
+    <!--
+      The Host's own unit tests, in the sense of "no database and no HTTP": the suite that
+      drives the running application is Modules.Users.Tests.Integration. Right now that
+      means HostLogs, which needs a test file like every other log catalogue (see
+      docs/log-event-ids.md) and has no business waiting on a Postgres container to run.
+    -->
     <ItemGroup>
-        <ProjectReference Include="..\Modules.Users.Features\Modules.Users.Features.csproj" />
+        <ProjectReference Include="..\TeamProjectBoard.Host\TeamProjectBoard.Host.csproj" />
     </ItemGroup>
-
-    <!-- Handlers are internal by design. The InternalsVisibleTo that lets this project
-         see them is declared in Modules.Users.Features.csproj, since the grant has to come
-         from the assembly that owns the types. -->
 
 </Project>

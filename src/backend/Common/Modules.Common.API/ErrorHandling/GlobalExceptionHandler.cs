@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Modules.Common.API.Logging;
 
 namespace Modules.Common.API.ErrorHandling;
 
@@ -33,7 +34,8 @@ internal sealed class GlobalExceptionHandler(
     {
         ArgumentNullException.ThrowIfNull(httpContext);
 
-        logger.LogError(exception, "Unhandled exception while processing {Method} {Path}",
+        logger.UnhandledException(
+            exception,
             httpContext.Request.Method,
             httpContext.Request.Path);
 
