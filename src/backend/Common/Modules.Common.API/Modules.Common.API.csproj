@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <!-- Why FrameworkReference rather than PackageReference: this is a plain class
+         library that needs the ASP.NET Core types (WebApplication, IResult, HttpContext).
+         FrameworkReference points at the shared framework already installed with the
+         runtime, so nothing is copied into the output. -->
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Swashbuckle.AspNetCore" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Modules.Common.Domain\Modules.Common.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

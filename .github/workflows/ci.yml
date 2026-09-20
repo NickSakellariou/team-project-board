@@ -1,0 +1,68 @@
+name: CI
+
+# Why both triggers: the pull_request run is the gate on merging, and the push run on
+# develop catches anything that reached the branch another way.
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+# A new push to the same branch makes the previous run's answer irrelevant, so cancel it
+# rather than queue behind it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test
+    # ubuntu-latest ships with Docker running, which the integration suite needs:
+    # Testcontainers starts a real Postgres and the tests fail without it.
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Keyed on the lock-free central package list: every version in the solution is
+      # declared in Directory.Packages.props, so it changes exactly when the graph does.
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('src/backend/Directory.Packages.props') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: dotnet restore src/backend/TeamProjectBoard.slnx
+
+      # Release, because TreatWarningsAsErrors plus AnalysisMode=All means the build is
+      # the first reviewer — and a warning that only appears in Release would otherwise
+      # reach the branch unnoticed.
+      - name: Build
+        run: dotnet build src/backend/TeamProjectBoard.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: >-
+          dotnet test src/backend/TeamProjectBoard.slnx
+          --configuration Release
+          --no-build
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory ${{ github.workspace }}/test-results
+
+      # if: always() so a failed run still uploads the results that explain why.
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/**/*.trx
+          retention-days: 14

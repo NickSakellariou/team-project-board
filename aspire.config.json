@@ -1,0 +1,5 @@
+{
+    "appHost": {
+        "path": "src\\backend\\TeamProjectBoard.AppHost\\TeamProjectBoard.AppHost.csproj"
+    }
+}

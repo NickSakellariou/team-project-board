@@ -1,3 +1,22 @@
 <Solution>
-  <Project Path="TeamProjectBoard.csproj" />
+  <Folder Name="/Common/">
+    <Project Path="Common/Modules.Common.API/Modules.Common.API.csproj" />
+    <Project Path="Common/Modules.Common.Application/Modules.Common.Application.csproj" />
+    <Project Path="Common/Modules.Common.Domain/Modules.Common.Domain.csproj" />
+    <Project Path="Common/Modules.Common.Infrastructure/Modules.Common.Infrastructure.csproj" />
+    <Project Path="Common/Modules.Common.Tests.Architecture/Modules.Common.Tests.Architecture.csproj" />
+    <Project Path="Common/Modules.Common.Tests.Unit/Modules.Common.Tests.Unit.csproj" />
+  </Folder>
+  <Folder Name="/Users/">
+    <Project Path="Users/Modules.Users.Domain/Modules.Users.Domain.csproj" />
+    <Project Path="Users/Modules.Users.Features/Modules.Users.Features.csproj" />
+    <Project Path="Users/Modules.Users.Infrastructure/Modules.Users.Infrastructure.csproj" />
+    <Project Path="Users/Modules.Users.PublicApi/Modules.Users.PublicApi.csproj" />
+    <Project Path="Users/Modules.Users.Tests.Integration/Modules.Users.Tests.Integration.csproj" />
+    <Project Path="Users/Modules.Users.Tests.Unit/Modules.Users.Tests.Unit.csproj" />
+  </Folder>
+  <Project Path="TeamProjectBoard.AppHost/TeamProjectBoard.AppHost.csproj" />
+  <Project Path="TeamProjectBoard.Host/TeamProjectBoard.Host.csproj" />
+  <Project Path="TeamProjectBoard.Host.Tests.Unit/TeamProjectBoard.Host.Tests.Unit.csproj" />
+  <Project Path="TeamProjectBoard.ServiceDefaults/TeamProjectBoard.ServiceDefaults.csproj" />
 </Solution>

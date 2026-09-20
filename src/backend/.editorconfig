@@ -41,3 +41,131 @@ dotnet_naming_symbols.any_async_methods.required_modifiers = async
 
 dotnet_naming_style.end_in_async.required_suffix = Async
 dotnet_naming_style.end_in_async.capitalization = pascal_case
+
+# --------------------------------------------------------------------------------------
+# Language style
+# --------------------------------------------------------------------------------------
+
+# File-scoped namespaces: one namespace per file, no wasted indentation level.
+csharp_style_namespace_declarations = file_scoped:error
+
+csharp_using_directive_placement = outside_namespace:warning
+csharp_prefer_braces = true:warning
+csharp_style_prefer_primary_constructors = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:silent
+csharp_style_expression_bodied_properties = true:silent
+
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# --------------------------------------------------------------------------------------
+# Analyzer rules deliberately turned off, with the reason.
+#
+# AnalysisMode=All enables every rule, including ones that contradict the architecture
+# in docs/adr/. Each suppression below is a decision, not a convenience — if you find
+# yourself adding one, write down why here.
+# --------------------------------------------------------------------------------------
+
+# CA1515: "type can be made internal" — our DTOs and contracts are public on purpose so
+# other modules (and the integration tests) can bind to them.
+dotnet_diagnostic.CA1515.severity = none
+
+# CA1812: "class is never instantiated" — endpoints, handlers and validators are found by
+# reflection at startup, so the analyzer cannot see the construction site.
+dotnet_diagnostic.CA1812.severity = none
+
+# CA1040: "avoid empty interfaces" — IHandler and IApiEndpoint are marker interfaces, and
+# being empty is the point: they exist so a reflection scan at startup can find the types
+# that implement them. See Modules.Common.Domain/Handlers/IHandler.cs.
+dotnet_diagnostic.CA1040.severity = none
+
+# CA1716: "identifier conflicts with a reserved keyword" — the rule protects consumers
+# writing VB.NET, where 'Error' is a keyword. This is a C#-only solution, and 'Error' is
+# the clearest available name for the type.
+dotnet_diagnostic.CA1716.severity = none
+
+# CA2225: "provide a named alternate for op_Implicit" — Result<T> does provide them
+# (FromValue/FromError/FromErrors); the rule only accepts the specific names ToResult and
+# FromTValue, which read worse at the call site.
+dotnet_diagnostic.CA2225.severity = none
+
+# CA1000: "do not declare static members on generic types" — Result<T>.FromValue must be
+# static on the generic type to know what T is. There is nowhere else for it to live.
+dotnet_diagnostic.CA1000.severity = none
+
+# CA2007 / MA0004: "call ConfigureAwait(false)" — the rule exists to avoid deadlocks when
+# an await resumes onto a captured SynchronizationContext. ASP.NET Core has had no
+# SynchronizationContext since .NET Core 1.0, so there is nothing to capture and the call
+# would be pure noise on every await in the solution.
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.MA0004.severity = none
+
+# CA1848: "use LoggerMessage delegates" — ON, and load-bearing. Every log event in the
+# solution is declared in a catalogue class (UserLogs, CommonApiLogs, ...) as a
+# [LoggerMessage] method, so that it carries a stable event id, its wording sits beside
+# every other event, and a dashboard built on an id survives a rename. This rule is what
+# stops a bare logger.LogInformation(...) slipping in and quietly creating an event that is
+# in no catalogue, has no id and is covered by no test. See docs/log-event-ids.md and the
+# adding-a-log skill. (The allocation argument the rule itself makes is real but secondary
+# at this scale — the catalogue is the reason.)
+dotnet_diagnostic.CA1848.severity = error
+
+# CA1873: "this log argument may be expensive to evaluate" — fires on any property access
+# inside a log call (user.Id, factory.ModuleName). Complying means wrapping log statements
+# in `if (logger.IsEnabled(...))`, which the generated LoggerMessage methods already do
+# internally. The arguments here are field reads, not work.
+dotnet_diagnostic.CA1873.severity = none
+
+# CA1002 / MA0016: "expose IReadOnlyList<T>, not List<T>" — obeyed everywhere except the
+# implicit conversion operators, where the C# language forbids interface types. Scoped to
+# that one file below rather than turned off globally.
+
+# MA0048: "file name must match type name" — kept on everywhere except the feature slices,
+# where it contradicts the naming convention on purpose. A slice is named for its use case,
+# so RegisterUser.Endpoint.cs holds RegisterUserEndpoint *and* RegisterUserRequest, and
+# RegisterUser.Handler.cs holds both IRegisterUserHandler and RegisterUserHandler. Splitting
+# them into one type per file would scatter a slice across seven files and lose the
+# grouping that makes vertical slices readable.
+[**/Modules.*.Features/**.cs]
+dotnet_diagnostic.MA0048.severity = none
+
+# AppHost.cs and Program.cs use top-level statements, so the compiler generates a class
+# named Program that will never match the file name.
+[**/{AppHost,Program}.cs]
+dotnet_diagnostic.MA0048.severity = none
+
+# EF Core migrations are written by `dotnet ef migrations add`, not by us. Holding
+# generated code to our style rules would mean hand-editing every migration — which is
+# also the one kind of file that must not be hand-edited, since its checksum is recorded
+# in the model snapshot. generated_code tells every analyzer to leave them alone.
+[**/Migrations/**.cs]
+generated_code = true
+dotnet_diagnostic.CA1062.severity = none
+dotnet_diagnostic.IDE0161.severity = none
+dotnet_diagnostic.MA0048.severity = none
+dotnet_diagnostic.MA0051.severity = none
+
+[**/Results/Result.ImplicitConverters.cs]
+dotnet_diagnostic.CA1002.severity = none
+dotnet_diagnostic.MA0016.severity = none
+
+# CA1707: "identifier contains underscores" — test names use the
+# [Method]_[Scenario]_[ExpectedResult] convention.
+# Note the leading ** rather than **/: a `**/` prefix needs at least one directory ahead of
+# the match, so it skips test projects that sit at the root of src/backend — which is where
+# TeamProjectBoard.Host.Tests.Unit lives, next to the Host it tests.
+[**Tests*/**.cs]
+dotnet_diagnostic.CA1707.severity = none
+
+# CA1711: "type should not end in Collection" — xUnit's own convention names a collection
+# definition class after the collection it defines.
+dotnet_diagnostic.CA1711.severity = none
+
+# CA2213: "disposable field is never disposed" — the test fixtures do dispose theirs, but
+# from an explicit IAsyncLifetime.DisposeAsync implementation, which the analyzer does not
+# recognise as a disposal path.
+dotnet_diagnostic.CA2213.severity = none
+
+# MA0048: test contract files deliberately hold several small records together, the same
+# reasoning as the feature slices above.
+dotnet_diagnostic.MA0048.severity = none
